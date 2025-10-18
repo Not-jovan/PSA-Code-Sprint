@@ -83,12 +83,12 @@ export type EmployeeProfile = z.infer<typeof EmployeeProfileSchema>;
  * function_area,specialization,skill_name
  * Info Tech: Infrastructure,Cloud Computing: Cloud Architecture,Cloud Architecture
  */
-export const SkillCsvRowSchema = z.object({
-  function_area: z.string().min(1),
-  specialization: z.string().min(1),
-  skill_name: z.string().min(1),
-});
-export const SkillsCsvSchema = z.array(SkillCsvRowSchema);
+export const SkillsCsvSchema = z.object({
+    function_area: z.string().min(1, "Function area is required"),
+    specialization: z.string().min(1, "Specialization is required"),
+    skill_name: z.string().min(1, "Skill name is required"),
+  });
+  
 
 export function validateEmployees(raw: unknown) {
     console.log("Validating employees data...");
@@ -109,11 +109,18 @@ export function validateEmployees(raw: unknown) {
   }
 
   export function validateSkillsCsv(rawRows: unknown) {
-    console.log("Raw rows:", rawRows); // Log the raw data
-    const parsed = SkillsCsvSchema.safeParse(rawRows);
+    console.log("Raw rows before validation:", rawRows); // Log raw rows
+    if (!Array.isArray(rawRows)) {
+      console.error("Invalid data format: expected an array.");
+      return [];
+    }
+    const parsed = SkillsCsvSchema.array().safeParse(rawRows);
     if (!parsed.success) {
-      console.error("Validation errors:", parsed.error.format());
-      throw new Error("Functions & Skills.csv failed validation");
+      console.warn("Some rows failed validation and will be skipped:", parsed.error.format());
+      const validRows = rawRows.filter((row, index) =>
+        !parsed.error.errors.some((e) => e.path[0] === index)
+      );
+      return validRows;
     }
     return parsed.data;
   }

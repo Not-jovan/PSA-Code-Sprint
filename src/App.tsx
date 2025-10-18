@@ -1,13 +1,21 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { loadEmployeesJson, loadSkillsCsv, indexSkills, annotateEmployeeSkills } from "./utils/dataLoader";
+import { loadEmployeesJson, loadSkillsXlsx, indexSkills, annotateEmployeeSkills } from "./utils/dataLoader";
+import DarkModeToggle from "./components/DarkModeToggle";
 import Login from "./components/Login";
+import NavTabs, { Tab } from "./components/NavTabs";
+import ProfilesTab from "./components/ProfilesTab";
+import CareerDevTab from "./components/CareerDevTab";
+import ChatbotWidget from "./components/ChatbotWidget";
+
 import type { EmployeeProfile } from "./validation/schemas";
 
 const App = () => {
   /** THEME MANAGEMENT **/
   const [darkMode, setDarkMode] = useState<boolean>(() => {
+    const stored = typeof window !== "undefined" ? localStorage.getItem("theme") : null;
+    if (stored) return stored === "dark";
     if (typeof window !== "undefined") {
-      return localStorage.getItem("theme") === "dark";
+      return window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
     }
     return false;
   });
@@ -16,6 +24,7 @@ const App = () => {
     document.documentElement.classList.toggle("dark", darkMode);
     localStorage.setItem("theme", darkMode ? "dark" : "light");
   }, [darkMode]);
+
 
   /** AUTHENTICATION **/
   const [currentUser, setCurrentUser] = useState<EmployeeProfile | null>(null);
@@ -65,7 +74,7 @@ const App = () => {
       try {
         setDataLoading(true);
         setDataError(null);
-
+  
         // Try loading employees from localStorage
         const saved = typeof window !== "undefined" ? localStorage.getItem("employeesData") : null;
         if (saved) {
@@ -78,16 +87,16 @@ const App = () => {
             console.warn("Invalid data in localStorage, falling back to fresh load.");
           }
         }
-
+  
         // Fresh load from public/data
         const employeesValidated = await loadEmployeesJson("/Data/employees.json");
-        const skillsRows = await loadSkillsCsv("/Data/Functions & Skills.csv");
+        const skillsRows = await loadSkillsXlsx("/Data/Functions & Skills.xlsx");
         const skillsIndex = indexSkills(skillsRows);
         const enrichedEmployees = annotateEmployeeSkills(employeesValidated, skillsIndex);
-
+  
         // Save to localStorage for future use
         localStorage.setItem("employeesData", JSON.stringify(enrichedEmployees));
-
+  
         // Update state
         setEmployees(enrichedEmployees);
       } catch (error) {
@@ -97,7 +106,7 @@ const App = () => {
         setDataLoading(false);
       }
     };
-
+  
     fetchData();
   }, []);
 
@@ -131,18 +140,45 @@ const App = () => {
           <span>
             Welcome, <strong>{currentUser.personal_info.name}</strong> (Employee)
           </span>
+          <DarkModeToggle enabled={darkMode} toggle={() => setDarkMode((v) => !v)} />
           <button
             onClick={handleLogout}
-            className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+            className="text-sm px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded"
           >
             Logout
           </button>
         </div>
       </header>
-      {/* Main Content */}
-      <main className="flex-grow p-4">
-        {/* Add your main app content here */}
-      </main>
+
+      {/* Alerts */}
+      {dataLoading && <div className="p-3 text-sm">Loading employee & skills data…</div>}
+      {dataError && (
+        <div className="p-3 text-sm bg-yellow-500/20 text-yellow-200 dark:text-yellow-100">
+          {dataError}
+        </div>
+      )}
+
+      {/* Tabs */}
+      <NavTabs>
+        <Tab label="Profiles">
+          <ProfilesTab
+            user={currentUser}
+            employees={employees}
+            onUpdateProfile={(updated) => {
+              setEmployees((prev) =>
+                prev.map((e) => (e.employee_id === updated.employee_id ? updated : e))
+              );
+            }}
+          />
+        </Tab>
+
+        <Tab label="Career Development">
+          <CareerDevTab user={currentUser} employees={employees} />
+        </Tab>
+      </NavTabs>
+
+      {/* Chatbot */}
+      <ChatbotWidget />
     </div>
   );
 };

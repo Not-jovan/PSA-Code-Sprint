@@ -1,4 +1,5 @@
 import Papa from "papaparse";
+import * as XLSX from "xlsx";
 import { validateEmployees, validateSkillsCsv, type EmployeeProfile } from "../validation/schemas";
 
 export async function loadEmployeesJson(
@@ -33,30 +34,30 @@ export type SkillCsvRow = {
   skill_name: string;
 };
 
-export async function loadSkillsCsv(
-  url = "/data/Functions & Skills.csv"
-): Promise<SkillCsvRow[]> {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Failed to fetch ${url} (${res.status})`);
-  const csvText = await res.text();
-
-  // Parse CSV with header row
-  const parsed = Papa.parse<SkillCsvRow>(csvText, {
-    header: true,
-    skipEmptyLines: true,
-    transformHeader: (h) => h.trim(),
-    transform: (v) => (typeof v === "string" ? v.trim() : v),
-  });
-
-  if (parsed.errors.length) {
-    console.error(parsed.errors);
-    throw new Error("CSV parse error");
+export async function loadSkillsXlsx(
+    url = "public/Data/Functions & Skills.xlsx"
+  ): Promise<SkillCsvRow[]> {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Failed to fetch ${url} (${res.status})`);
+    const arrayBuffer = await res.arrayBuffer();
+  
+    // Parse XLSX file
+    const workbook = XLSX.read(arrayBuffer, { type: "array" });
+    const sheetName = workbook.SheetNames[0]; // Use the first sheet
+    const sheet = workbook.Sheets[sheetName];
+  
+    // Convert the sheet to JSON
+    const jsonData: SkillCsvRow[] = XLSX.utils.sheet_to_json(sheet, {
+      defval: "", // Default value for empty cells
+      raw: false, // Parse values as strings
+    });
+  
+    console.log("Raw parsed XLSX data:", jsonData); // Log the raw parsed data
+  
+    // Validate the parsed data
+    const rows = validateSkillsCsv(jsonData);
+    return rows;
   }
-
-  // Zod validation of all rows
-  const rows = validateSkillsCsv(parsed.data);
-  return rows;
-}
 
 /** Optional helper:
  * index skills for quick lookups (function_area + specialization + skill_name -> true)
