@@ -6,6 +6,7 @@ import NavTabs, { Tab } from "./components/NavTabs";
 import ProfilesTab from "./components/ProfilesTab";
 import CareerDevTab from "./components/CareerDevTab";
 import ChatbotWidget from "./components/ChatbotWidget";
+import Feedback from "./components/Feedback";
 
 import type { EmployeeProfile } from "./validation/schemas";
 
@@ -175,12 +176,20 @@ const App = () => {
         <Tab label="Career Development">
           <CareerDevTab user={currentUser} employees={employees} />
         </Tab>
+
+  <Tab label="Feedback">
+    <Feedback/>
+  </Tab>
       </NavTabs>
+
 
       {/* Chatbot */}
       <ChatbotWidget />
+
+
     </div>
   );
 };
+
 
 export default App;
