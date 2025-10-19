@@ -269,6 +269,18 @@ def chat():
 
     vector_store_id = data.get("vector_store_id") or DEFAULT_VECTOR_STORE_ID
 
+    # Check for content filtering results
+    content_filter_result = data.get("content_filter_result", {})
+    for category, result in content_filter_result.items():
+        if result.get("filtered", False):
+            # Return a response if any category is filtered
+            return jsonify({
+                "reply": f"Sorry, your query was flagged for {category} content and cannot be processed.",
+                "mode": mode,
+                "filtered_category": category,
+                "severity": result.get("severity", "unknown")
+            })
+
 
     # ---------------- Initialize per-user chat session ----------------
 
