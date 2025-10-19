@@ -1,5 +1,9 @@
 import json, requests, json
 import pandas as pd
+from flask import flask, request, jsonify
+from psa_chatbot import CareerChatSession, read_data, system_prompt
+
+app = flask(__name__)
 
 def skill_file_reading_excel(xlsx_path):
     df = pd.read_excel(xlsx_path)
