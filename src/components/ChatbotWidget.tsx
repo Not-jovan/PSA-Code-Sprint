@@ -70,15 +70,16 @@ export default function ChatbotWidget() {
       console.log("Final endpoint being used:", endpoint); // Debugging log
 
       const res = await fetchWithTimeout(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          mode,
-          message: userText,
-          history,
-          vector_store_id: vectorStoreId || undefined,
-        }),
-      });
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        mode,
+        message: userText,
+        history,
+        vector_store_id: vectorStoreId || undefined,
+      }),
+      credentials: "include"
+});
 
       const { ok, data, text } = await parseResponse(res);
 
