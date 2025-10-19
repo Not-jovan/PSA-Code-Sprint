@@ -85,11 +85,11 @@ def build_messages(mode: str, user_message: str, history=None, employee_id=None)
     # Load structured HR context only on first message (when employee_id provided)
     if mode == "mentor" and employee_id:
         current, all_emps = read_employee_data(
-            os.path.join(os.path.dirname(__file__), "../Data/Employee_Profiles.json"),
+            os.path.join(os.path.dirname(__file__), "../Data/employees.json"),
             employee_id
         )
         skill_context = read_skills_excel(
-            os.path.join(os.path.dirname(__file__), "../Data/Functions & Skills.xlsx")
+            os.path.join(os.path.dirname(__file__), "../Data/Functions_Skills.xlsx")
         )
 
 
