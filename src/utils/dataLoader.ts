@@ -1,96 +1,95 @@
-import Papa from "papaparse";
+// dataLoader.ts
+// Fully updated loader with schema-safe validation, Excel skill transformation, and logging
+
 import * as XLSX from "xlsx";
-import { validateEmployees, validateSkillsCsv, type EmployeeProfile } from "../validation/schemas";
+import { z } from "zod";
+import {
+  EmployeesSchema,
+  SkillsCsvSchema,
+  type EmployeeProfile,
+  type SkillCsvRow,
+  type SkillIndex,
+} from "../validation/schemas";
 
-export async function loadEmployeesJson(
-    url = "public/Data/employees.json"
-  ): Promise<EmployeeProfile[]> {
-    console.log("Fetching employees.json from:", url);
-    const res = await fetch(url);
-    const text = await res.text(); // Read the raw response as text
-    console.log("Raw response:", text);
-  
-    if (!res.ok) {
-      console.error(`Failed to fetch ${url}: ${res.status} ${res.statusText}`);
-      throw new Error(`Failed to fetch ${url} (${res.status})`);
-    }
-  
-    try {
-      const raw = JSON.parse(text); // Parse the JSON
-      console.log("Parsed JSON:", raw);
-      const validated = validateEmployees(raw);
-      console.log("Validated employees data:", validated);
-      return validated;
-    } catch (e) {
-      console.error("Error parsing or validating JSON:", e);
-      throw new Error("Invalid employees data format.");
-    }
-  }
-
-  
-export type SkillCsvRow = {
-  function_area: string;
-  specialization: string;
-  skill_name: string;
-};
-
-export async function loadSkillsXlsx(
-    url = "public/Data/Functions & Skills.xlsx"
-  ): Promise<SkillCsvRow[]> {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Failed to fetch ${url} (${res.status})`);
-    const arrayBuffer = await res.arrayBuffer();
-  
-    // Parse XLSX file
-    const workbook = XLSX.read(arrayBuffer, { type: "array" });
-    const sheetName = workbook.SheetNames[0]; // Use the first sheet
-    const sheet = workbook.Sheets[sheetName];
-  
-    // Convert the sheet to JSON
-    const jsonData: SkillCsvRow[] = XLSX.utils.sheet_to_json(sheet, {
-      defval: "", // Default value for empty cells
-      raw: false, // Parse values as strings
-    });
-  
-    console.log("Raw parsed XLSX data:", jsonData); // Log the raw parsed data
-  
-    // Validate the parsed data
-    const rows = validateSkillsCsv(jsonData);
-    return rows;
-  }
-
-/** Optional helper:
- * index skills for quick lookups (function_area + specialization + skill_name -> true)
+/**
+ * Validate parsed employees.json against Zod schema
  */
-export function indexSkills(rows: SkillCsvRow[]) {
-  const set = new Set<string>();
-  for (const r of rows) {
-    set.add(keyOf(r.function_area, r.specialization, r.skill_name));
+export async function loadEmployeesJson(path = "/Data/employees.json"): Promise<EmployeeProfile[]> {
+  const res = await fetch(path);
+  if (!res.ok) throw new Error(`Failed to fetch ${path} (${res.status})`);
+  const json = await res.json();
+
+  const parsed = EmployeesSchema.safeParse(json);
+  if (!parsed.success) {
+    console.error("Employee JSON validation errors:", parsed.error.format());
+    throw new Error("Employee data is invalid");
   }
-  return {
-    has(function_area: string, specialization: string, skill_name: string) {
-      return set.has(keyOf(function_area, specialization, skill_name));
-    },
-  };
+  return parsed.data;
 }
 
-function keyOf(fa: string, sp: string, sn: string) {
-  return `${fa}__${sp}__${sn}`.toLowerCase();
+/**
+ * Validate parsed Excel rows against skill row schema
+ */
+export function validateSkillsCsv(rows: unknown[]): SkillCsvRow[] {
+  return rows.filter((row, i) => {
+    const parsed = SkillsCsvSchema.safeParse(row);
+    if (!parsed.success) {
+      console.warn(`Invalid skill row [${i}]`, parsed.error.format());
+      return false;
+    }
+    return true;
+  }) as SkillCsvRow[];
 }
 
-/** Optional helper:
- * annotate each employee's skills with a flag whether it exists in the taxonomy CSV
+/**
+ * Load and normalize the Functions_Skills.xlsx file
+ */
+export async function loadSkillsXlsx(url = "/Data/Functions_Skills.xlsx"): Promise<SkillCsvRow[]> {
+  const res = await fetch(url);
+  console.log("Fetching skills file from:", url);
+  if (!res.ok) throw new Error(`Failed to fetch ${url} (${res.status})`);
+  const arrayBuffer = await res.arrayBuffer();
+  const workbook = XLSX.read(arrayBuffer, { type: "array" });
+  const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+  const rawData = XLSX.utils.sheet_to_json(sheet, { defval: "", raw: false });
+
+  const normalizedData: SkillCsvRow[] = rawData.map((rowRaw) => {
+    const row = rowRaw as Record<string, string>;
+    const function_area = (row["Function / Unit / Skill"] || "").trim();
+    const specialization = (row["Specialisation / Unit"] || "").trim();
+    const skill_name = specialization.includes(":")
+      ? (specialization.split(":").pop() || "").trim()
+      : specialization;
+    return { function_area, specialization, skill_name };
+  });
+
+  return validateSkillsCsv(normalizedData);
+}
+
+/**
+ * Build a quick index for skill name lookups
+ */
+export function indexSkills(rows: SkillCsvRow[]): SkillIndex {
+  const index: SkillIndex = {};
+  for (const row of rows) {
+    index[row.skill_name] = row;
+  }
+  return index;
+}
+
+/**
+ * Mark each employee's skills with an `in_taxonomy` boolean based on the index
  */
 export function annotateEmployeeSkills(
   employees: EmployeeProfile[],
-  skillsIndex: ReturnType<typeof indexSkills>
-) {
-  return employees.map((e) => {
-    const enrichedSkills =
-      e.skills?.map((s) => ({
-        ...s,
-        in_taxonomy: skillsIndex.has(s.function_area, s.specialization, s.skill_name),
-      })) ?? [];
-    return { ...e, skills: enrichedSkills as any };
+  index: SkillIndex
+): EmployeeProfile[] {
+  return employees.map((employee) => {
+    const updatedSkills = (employee.skills || []).map((s) => ({
+      ...s,
+      in_taxonomy: !!index[s.skill_name],
+    }));
+    return { ...employee, skills: updatedSkills };
   });
 }
