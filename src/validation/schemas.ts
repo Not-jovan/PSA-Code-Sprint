@@ -1,10 +1,15 @@
 import { z } from "zod";
 
 /** --- Employees --- */
+// schemas.ts – expand allowed proficiencies in LanguageSchema
 export const LanguageSchema = z.object({
   language: z.string(),
-  proficiency: z.enum(["Fluent", "Intermediate", "Basic"]),
+  proficiency: z.enum([
+    "Fluent", "Intermediate", "Basic", 
+    "Professional", "Conversational"
+  ]),
 });
+
 
 export const PersonalInfoSchema = z.object({
   name: z.string(),
@@ -88,14 +93,17 @@ export const SkillsCsvSchema = z.object({
     specialization: z.string().min(1, "Specialization is required"),
     skill_name: z.string().min(1, "Skill name is required"),
   });
+
+
+  export type SkillCsvRow = z.infer<typeof SkillsCsvSchema>;
+  export type SkillIndex = Record<string, SkillCsvRow>;
   
 
-export function validateEmployees(raw: unknown) {
+  export function validateEmployees(raw: unknown) {
     console.log("Validating employees data...");
     const parsed = EmployeeProfileSchema.array().safeParse(raw);
     if (!parsed.success) {
       console.error("Validation errors:", parsed.error.format());
-      // Ensure raw is an array before filtering
       if (Array.isArray(raw)) {
         const validEntries = raw.filter((entry, index) => !parsed.error.errors.some(e => e.path[0] === index));
         console.warn("Some entries were invalid and have been skipped.");
