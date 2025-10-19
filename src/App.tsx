@@ -12,14 +12,8 @@ import type { EmployeeProfile } from "./validation/schemas";
 
 const App = () => {
   /** THEME MANAGEMENT **/
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    const stored = typeof window !== "undefined" ? localStorage.getItem("theme") : null;
-    if (stored) return stored === "dark";
-    if (typeof window !== "undefined") {
-      return window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
-    }
-    return false;
-  });
+  const [darkMode, setDarkMode] = useState(false); // Centralized dark mode state
+  const toggleDarkMode = () => setDarkMode((prev) => !prev); // Toggle function
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
@@ -147,7 +141,7 @@ return (
         <span>
           Welcome, <strong>{currentUser.personal_info.name}</strong> (Employee)
         </span>
-        <DarkModeToggle enabled={darkMode} toggle={() => setDarkMode((v) => !v)} />
+        <DarkModeToggle enabled={darkMode} toggle={toggleDarkMode} />
         <button
           onClick={handleLogout}
           className="text-sm px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded"
@@ -184,7 +178,7 @@ return (
       </Tab>
 
       <Tab label="Feedback">
-        <Feedback />
+        <Feedback darkMode={darkMode}/>
       </Tab>
     </NavTabs>
 

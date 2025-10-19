@@ -45,7 +45,7 @@ MENTOR_SYSTEM = (
             * **NEVER** disclose raw employee data, specific employee names, job titles, or project names as context. Base suggestions only on anonymized, aggregated peer data (e.g., "People who have simialr jobscopes have also taken up these roles or projects").
             * Answer all user questions while prioritizing advice relevant *only* to the current user's profile.
             * Conclude your response with a relevant, open-ended question to guide the user to the next logical step in their career planning.
-            * Reply in a friendly and approachale tone to the user (try to acknoledge who her/she is), and reassure them if they are facing any emotional issues.
+            * Reply in a friendly and approachable tone to the user (try to acknoledge who her/she is), and reassure them if they are facing any emotional issues.
             """
 
 )
@@ -70,6 +70,9 @@ CRISIS_RESPONSE = (
 
 # ---------------- Helpers ----------------
 def build_messages(mode: str, user_message: str, history=None):
+    if any(keyword in user_message.lower() for keyword in CRISIS_KEYWORDS):
+        return [{"role": "assistant", "content": CRISIS_RESPONSE}]
+    
     system = MENTOR_SYSTEM if mode == "mentor" else SUPPORT_SYSTEM
     msgs = [{"role": "system", "content": system}]
     if history:
