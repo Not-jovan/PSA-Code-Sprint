@@ -28,7 +28,10 @@ const App = () => {
 
 
   /** AUTHENTICATION **/
-  const [currentUser, setCurrentUser] = useState<EmployeeProfile | null>(null);
+  const [currentUser, setCurrentUser] = useState<EmployeeProfile | null>(() => {
+  const saved = typeof window !== "undefined" ? localStorage.getItem("currentUser") : null;
+  return saved ? JSON.parse(saved) : null;
+});
   const [loadError, setLoadError] = useState<string | null>(null);
   const [employees, setEmployees] = useState<EmployeeProfile[]>([]);
   const [dataLoading, setDataLoading] = useState<boolean>(true);
@@ -36,37 +39,43 @@ const App = () => {
 
   const sharedPassword = "password"; // Temporary shared password
 
-  const handleLogin = useCallback(
-    (employeeId: string, password: string) => {
-      console.log("Attempting login with:", { employeeId, password });
-      console.log("Loaded employees:", employees);
+  const handleLogin = useCallback(async (username: string, password: string): Promise<boolean> => {
+   try {
+     const res = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+     });   
+     if (!res.ok) {
+      const errorData = await res.json().catch(() => ({ error: 'Unknown server error' }));
+       console.error(`Login failed for ${username}: ${errorData.error || 'Server error'}. Try EMP-20001 / password123.`);
+       return false;
+     }
 
-      if (!employees || employees.length === 0) {
-        console.error("Employees data is not loaded.");
-        return false;
-      }
+     const data = await res.json();
 
-      const employee = employees.find((e) => e.employee_id === employeeId);
-      console.log("Matched employee:", employee);
+   setCurrentUser({ 
+  employee_id: data.username, 
+  personal_info: { name: data.name } 
+} as EmployeeProfile);
 
-      if (!employee) {
-        console.error("Employee ID not found.");
-        return false;
-      }
+   
+   localStorage.setItem("currentUser", JSON.stringify({ 
+  employee_id: data.username, 
+  personal_info: { name: data.name } 
+}));
+   return true;
+  
+   } catch (error) {
+     console.error("Network or parsing error during login:", error);
+     return false;
+   }
+ }, []);
 
-      if (password !== sharedPassword) {
-        console.error("Incorrect password.");
-        return false;
-      }
-
-      setCurrentUser(employee);
-      console.log("Login successful:", employee);
-      return true;
-    },
-    [employees]
-  );
-
-  const handleLogout = () => setCurrentUser(null);
+  const handleLogout = () => {
+  setCurrentUser(null);
+  localStorage.removeItem("currentUser");
+};
 
   /** EMPLOYEES + SKILLS DATA **/
 
@@ -132,7 +141,14 @@ if (!currentUser) {
       {dataError && (
         <div className="text-sm bg-red-600 text-white rounded px-3 py-2">{dataError}</div>
       )}
-      <Login onLogin={handleLogin} />
+      <Login
+      onLogin={(username, password) => {
+    handleLogin(username, password).then((success) => {
+      if (!success) alert("Login failed");
+    });
+    return true; // Return something synchronously to satisfy TS (ignored)
+  }}
+/>
     </div>
   );
 }
@@ -145,7 +161,7 @@ return (
       <h1 className="text-xl font-semibold">Career Pathway Portal</h1>
       <div className="flex items-center gap-3">
         <span>
-          Welcome, <strong>{currentUser.personal_info.name}</strong> (Employee)
+          Welcome, <strong>{currentUser.personal_info?.name || currentUser.employee_id}</strong>
         </span>
         <DarkModeToggle enabled={darkMode} toggle={() => setDarkMode((v) => !v)} />
         <button
