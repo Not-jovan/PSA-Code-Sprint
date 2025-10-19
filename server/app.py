@@ -6,10 +6,15 @@ from flask_socketio import SocketIO, emit
 from flask_cors import CORS
 import requests
 
+
+
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 socketio = SocketIO(app, cors_allowed_origins="*")  # Enable CORS for WebSocket
+app.url_map.strict_slashes = False
+from leadership import leadership_bp, set_azure_chat
+app.register_blueprint(leadership_bp)
 
 # ---------------- Config (env) ----------------
 # Load environment variables from .env file
@@ -99,6 +104,8 @@ def azure_chat(messages, vector_store_id=None, temperature=1):
     except Exception as e:
         print("Exception:", str(e))  # Log any other exceptions
         raise Exception(f"Error: {str(e)}")
+
+set_azure_chat(azure_chat)
 # ---------------- Routes ----------------
 @app.get("/api/health")
 def health():

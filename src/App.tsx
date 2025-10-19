@@ -7,6 +7,7 @@ import ProfilesTab from "./components/ProfilesTab";
 import CareerDevTab from "./components/CareerDevTab";
 import ChatbotWidget from "./components/ChatbotWidget";
 import Feedback from "./components/Feedback";
+import LeadershipPotential from "./components/LeadershipPotential";
 
 import type { EmployeeProfile } from "./validation/schemas";
 
@@ -177,9 +178,14 @@ const App = () => {
           <CareerDevTab user={currentUser} employees={employees} />
         </Tab>
 
-  <Tab label="Feedback">
-    <Feedback/>
-  </Tab>
+        <Tab label="Feedback">
+            <Feedback/>
+        </Tab>
+
+        <Tab label = "Leadership Potential">
+            <LeadershipPotential/>
+        </Tab>
+
       </NavTabs>
 
 
