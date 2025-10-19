@@ -74,6 +74,11 @@ CRISIS_RESPONSE = (
 
 # ---------------- Helpers ----------------
 def build_messages(mode: str, user_message: str, history=None, employee_id=None):
+
+        # Check for crisis keywords
+    if any(keyword in user_message.lower() for keyword in CRISIS_KEYWORDS):
+        return [{"role": "assistant", "content": CRISIS_RESPONSE}]
+
     system = MENTOR_SYSTEM if mode == "mentor" else SUPPORT_SYSTEM
     msgs = [{"role": "system", "content": system}]
 
