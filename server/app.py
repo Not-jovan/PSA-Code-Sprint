@@ -77,7 +77,12 @@ def build_messages(mode: str, user_message: str, history=None, employee_id=None)
 
         # Check for crisis keywords
     if any(keyword in user_message.lower() for keyword in CRISIS_KEYWORDS):
-        return [{"role": "assistant", "content": CRISIS_RESPONSE}]
+        if mode == "mentor":
+            # Return restricted message for mentor mode
+            return [{"role": "assistant", "content": "Sorry, that query is not allowed"}]
+        else:
+            # Return crisis response for support mode
+            return [{"role": "assistant", "content": CRISIS_RESPONSE}]
 
     system = MENTOR_SYSTEM if mode == "mentor" else SUPPORT_SYSTEM
     msgs = [{"role": "system", "content": system}]
@@ -257,12 +262,13 @@ def chat():
         return jsonify({"error": "bad_request", "detail": "message required"}), 400
 
     # ---------------- Crisis check for support mode ----------------
-    if mode == "support":
+    if mode == "support" or mode == "mentor":
         lowered = message.lower()
         if any(k in lowered for k in CRISIS_KEYWORDS):
             return jsonify({"reply": CRISIS_RESPONSE, "mode": mode, "crisis": True})
 
     vector_store_id = data.get("vector_store_id") or DEFAULT_VECTOR_STORE_ID
+
 
     # ---------------- Initialize per-user chat session ----------------
 
