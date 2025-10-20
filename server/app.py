@@ -211,32 +211,64 @@ def login():
     if not username or not password:
         return jsonify({"error": "username_and_password_required"}), 400
 
-    # Check DB
+    # Check if DB exists
     if not os.path.exists(DB_PATH):
         return jsonify({"error": "db_not_found", "detail": DB_PATH}), 500
 
     try:
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
-        cursor.execute("SELECT password, name FROM users WHERE username=?", (username,))
+        # ✅ fetch password, name, and isadmin (flag)
+        cursor.execute("SELECT password, name, isadmin FROM users WHERE username=?", (username,))
         row = cursor.fetchone()
         conn.close()
     except Exception as e:
         return jsonify({"error": "db_error", "detail": str(e)}), 500
 
-    if not row or row[0] != password:
+    if not row:
         return jsonify({"error": "invalid_credentials"}), 401
 
-    # Successful login → save username in session
-    session["username"] = username
+    db_password, db_name, isadmin = (
+        row[0],
+        row[1] if len(row) > 1 else "",
+        int(row[2]) if len(row) > 2 and row[2] is not None else 0,
+    )
+
+    if db_password != password:
+        return jsonify({"error": "invalid_credentials"}), 401
+
+    # ✅ Store in session
+    session["username"] = username           # unique ID or login
+    session["name"] = db_name                # employee's real name
+    session["isadmin"] = 1 if isadmin == 1 else 0  # authority flag
+
     if "histories" not in session:
         session["histories"] = {}
 
     return jsonify({
         "ok": True,
         "username": username,
-        "name": row[1]  # <— name fetched from DB
+        "name": db_name,         # keep name as the actual employee name
+        "isadmin": session["isadmin"],  # 1 means admin privileges
     })
+
+# ---------------- Who Am I (check current session) ----------------
+from flask_cors import cross_origin
+
+@app.get("/api/whoami")
+@cross_origin(origins=["http://localhost:3000"], supports_credentials=True)
+def whoami():
+    """Return the currently logged-in user’s session info"""
+    if "username" not in session:
+        return jsonify({"logged_in": False}), 401
+
+    return jsonify({
+        "logged_in": True,
+        "username": session.get("username"),
+        "name": session.get("name"),
+        "isadmin": session.get("isadmin", 0),
+    })
+
 
 @app.post("/api/chat")
 def chat():
@@ -264,6 +296,9 @@ def chat():
     message = (data.get("message") or "").strip()
     if not message:
         return jsonify({"error": "bad_request", "detail": "message required"}), 400
+
+
+
 
     # ---------------- Crisis check for support mode ----------------
     if mode == "support" or mode == "mentor":
@@ -357,7 +392,10 @@ def create_vector_store():
     r.raise_for_status()
     return jsonify(r.json()), 201
 
-#----------------Leadership Potential----------------------
+
+
+
+# ----------------Leadership Potential----------------------
 
 from leadership import compute_weighted_LPI, summarize_leadership
 from flask_cors import cross_origin
@@ -374,8 +412,14 @@ def leadership_me():
     if not username:
         return jsonify({"error": "not_logged_in", "detail": "Please log in first."}), 401
 
-    # Load only this user's employee data
-    json_path = os.path.join(os.path.dirname(__file__), "../public/Data/employees.json")
+
+    json_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "public",
+        "Data",
+        "employees.json"
+    )
+
     try:
         with open(json_path, "r", encoding="utf-8") as f:
             employees = json.load(f)
@@ -404,6 +448,63 @@ def leadership_me():
     except Exception as e:
         print("leadership_me error:", e)
         return jsonify({"error": "internal_error", "detail": str(e)}), 500
+
+# -----------------Leadership Potential(Admin)--------
+from leadership import compute_weighted_LPI, summarize_leadership
+from flask_cors import cross_origin
+
+@app.route("/api/leadership/all", methods=["OPTIONS", "GET"])
+@cross_origin(
+    origins=["http://localhost:3000"],
+    allow_headers=["Content-Type"],
+    supports_credentials=True
+)
+def leadership_all():
+    if request.method == "OPTIONS":
+        return ("", 204)
+
+
+    if not session.get("isadmin"):
+        return jsonify({"error": "forbidden", "detail": "Admin access only"}), 403
+
+
+    json_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "public",
+        "Data",
+        "employees.json"
+    )
+
+    try:
+        with open(json_path, "r", encoding="utf-8") as f:
+            employees = json.load(f)
+    except Exception as e:
+        return jsonify({"error": "data_load_failed", "detail": str(e)}), 500
+
+    results = []
+    for emp in employees:
+        try:
+            score, subscores = compute_weighted_LPI(emp)
+            try:
+                summary = summarize_leadership(emp, score, subscores)
+            except Exception as e:
+                summary = f"(AI summary unavailable: {e})"
+            results.append({
+                "employee_id": emp.get("employee_id"),
+                "name": (emp.get("personal_info") or {}).get("name"),
+                "leadership_score": score,
+                "dimension_scores": subscores,
+                "ai_summary": summary,
+            })
+        except Exception as e:
+            results.append({
+                "employee_id": emp.get("employee_id"),
+                "name": (emp.get("personal_info") or {}).get("name"),
+                "error": f"scoring_failed: {e}",
+            })
+
+    return jsonify({"count": len(results), "results": results}), 200
+
 
 
 # ---------------- WebSocket Routes ----------------

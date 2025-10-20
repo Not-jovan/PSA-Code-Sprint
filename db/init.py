@@ -31,11 +31,11 @@ VALUES (?, ?, ?, ?)
 cursor.execute("""
 INSERT OR IGNORE INTO users (username, password, name, isadmin)
 VALUES (?, ?, ?, ?)
-""", ("EMP-20004", "password", "Grace Lee", 0))
+""", ("EMP-20004", "password", "Grace Lee", 1))
 cursor.execute("""
 INSERT OR IGNORE INTO users (username, password, name, isadmin)
 VALUES (?, ?, ?, ?)
-""", ("EMP-20005", "password", "Felicia Goh", 1))  # Admin
+""", ("EMP-20005", "password", "Felicia Goh", 0))  # Admin
 
 conn.commit()
 conn.close()

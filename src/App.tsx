@@ -46,16 +46,18 @@ const App = () => {
 
      const data = await res.json();
 
-   setCurrentUser({ 
-  employee_id: data.username, 
-  personal_info: { name: data.name } 
+   setCurrentUser({
+  employee_id: data.username,
+  personal_info: { name: data.name },
+  isadmin: data.isadmin
 } as EmployeeProfile);
 
-   
-   localStorage.setItem("currentUser", JSON.stringify({ 
-  employee_id: data.username, 
-  personal_info: { name: data.name } 
+localStorage.setItem("currentUser", JSON.stringify({
+  employee_id: data.username,
+  personal_info: { name: data.name },
+  isadmin: data.isadmin
 }));
+
    return true;
   
    } catch (error) {
@@ -153,8 +155,13 @@ return (
       <h1 className="text-xl font-semibold">Career Pathway Portal</h1>
       <div className="flex items-center gap-3">
         <span>
-          Welcome, <strong>{currentUser.personal_info?.name || currentUser.employee_id}</strong>
-        </span>
+  Welcome,{" "}
+  <strong>
+    {currentUser.personal_info?.name || currentUser.employee_id}
+    {currentUser.isadmin === 1 && <span className="text-blue-600"> (Admin)</span>}
+  </strong>
+</span>
+
         <DarkModeToggle enabled={darkMode} toggle={toggleDarkMode} />
         <button
           onClick={handleLogout}

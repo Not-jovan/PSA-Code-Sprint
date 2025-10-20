@@ -78,6 +78,7 @@ export const EmployeeProfileSchema = z.object({
   positions_history: z.array(PositionHistorySchema).optional(),
   projects: z.array(ProjectSchema).optional(),
   education: z.array(EducationSchema).optional(),
+  isadmin: z.number().optional()
 });
 
 export const EmployeesSchema = z.array(EmployeeProfileSchema);
