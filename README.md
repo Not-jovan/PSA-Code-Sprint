@@ -31,14 +31,13 @@ Before you begin, ensure you have the following installed on your system:
 ---
 
 ## **Setup Instructions**
-
 ### **1. Clone the Repository**
-    ```shell
+``` 
     git clone <gh repo clone Not-jovan/PSA-Code-Sprint>
     cd PSA-Code-Sprint
-    ```
-
-### **2. Install dependencies
+    
+```
+### 2. Install dependencies
 
 #### **Backend Dependencies**
 ## Setup
