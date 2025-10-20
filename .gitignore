@@ -36,9 +36,10 @@ Thumbs.db
 # TypeScript
 *.tsbuildinfo
 
-# Vite (if you switch later)
-.vite/
+# Python cache
+__pycache__/
 
 # Parcel/Next (future-proofing)
 .cache/
 .next/
+
