@@ -10,11 +10,8 @@ This project is an employee career portal that includes a React-based frontend a
    - [1. Clone the Repository](#1-clone-the-repository)
    - [2. Install Dependencies](#2-install-dependencies)
 3. [Starting the Servers](#starting-the-servers)
-   - [1. Start the Backend Server](#1-start-the-backend-server)
-   - [2. Start the Frontend Server](#2-start-the-frontend-server)
 4. [Database Initialization](#database-initialization)
-5. [Available Scripts](#available-scripts)
-6. [Troubleshooting](#troubleshooting)
+5. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -41,7 +38,7 @@ Before you begin, ensure you have the following installed on your system:
     cd PSA-Code-Sprint
     ```
 
-### **2. Setup
+### **2. Install dependencies
 
 #### **Backend Dependencies**
 ## Setup
@@ -52,7 +49,7 @@ Before you begin, ensure you have the following installed on your system:
 2. Run `pnpm i` to install the dependencies. Make sure you are in this working directory in your CLI.
 3. Run  `pip install -r requirements.txt` to install the python packages. 
 4. Setup `.env`.
-```shell
+
 
 ---
 
@@ -78,8 +75,7 @@ Before you begin, ensure you have the following installed on your system:
     ```
 3. The frontend server should now be running at `http://localhost:3000`.
 
----
-
+```
 ## **Database Initialization**
 1. Navigate to the `db` directory:
     ```
@@ -118,7 +114,7 @@ Before you begin, ensure you have the following installed on your system:
     - Ensure the `init.py` script has been run successfully.
 
 ---
-```
+
 **Project Structure**
 
 employee-career-portal/
