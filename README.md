@@ -116,7 +116,7 @@ Before you begin, ensure you have the following installed on your system:
 ---
 
 **Project Structure**
-
+```shell
 employee-career-portal/
 ├── db/
 │   ├── init.py         # Database initialization script
@@ -150,8 +150,8 @@ employee-career-portal/
 ├── package.json         # Node.js dependencies
 ├── README.md            # Project documentation
 ├── example.env          # example of .env file
-
+```
 ---
-```shell
+
 ## **License**
 This project is licensed under the [MIT License](LICENSE).
