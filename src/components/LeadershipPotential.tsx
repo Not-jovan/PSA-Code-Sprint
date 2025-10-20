@@ -99,13 +99,18 @@ export default function LeadershipPotential() {
         <div className="mt-6 space-y-4">
           {allResults.map((r) => (
             <div key={r.employee_id} className="bg-white p-4 rounded shadow">
-              <h3 className="text-lg font-semibold">{r.name}</h3>
-              <p className="text-sm text-gray-700">Leadership Score: <strong>{r.leadership_score}</strong></p>
-              <pre className="bg-gray-50 text-xs p-2 rounded overflow-auto mt-2">
-                {JSON.stringify(r.dimension_scores, null, 2)}
-              </pre>
-              <p className="text-gray-600 mt-2 whitespace-pre-line">{r.ai_summary}</p>
-            </div>
+            <h3 className="text-lg font-semibold">
+              {r.name}
+              {r.isadmin === 1 && <span className="text-blue-600"> (Admin)</span>}
+            </h3>
+            <p className="text-sm text-gray-700">
+              Leadership Score: <strong>{r.leadership_score}</strong>
+            </p>
+            <pre className="bg-gray-50 text-xs p-2 rounded overflow-auto mt-2">
+              {JSON.stringify(r.dimension_scores, null, 2)}
+            </pre>
+            <p className="text-gray-600 mt-2 whitespace-pre-line">{r.ai_summary}</p>
+          </div>
           ))}
         </div>
       )}

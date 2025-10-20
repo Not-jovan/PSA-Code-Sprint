@@ -90,11 +90,11 @@ def build_messages(mode: str, user_message: str, history=None, employee_id=None)
     # Load structured HR context only on first message (when employee_id provided)
     if mode == "mentor" and employee_id:
         current, all_emps = read_employee_data(
-            os.path.join(os.path.dirname(__file__), "../Data/employees.json"),
+            os.path.join(os.path.dirname(__file__), "../public/Data/employees.json"),
             employee_id
         )
         skill_context = read_skills_excel(
-            os.path.join(os.path.dirname(__file__), "../Data/Functions_Skills.xlsx")
+            os.path.join(os.path.dirname(__file__), "../public/Data/Functions_Skills.xlsx")
         )
 
 
@@ -228,12 +228,17 @@ def login():
     if not row:
         return jsonify({"error": "invalid_credentials"}), 401
 
+    # Extract values from the database row
     db_password, db_name, isadmin = (
         row[0],
         row[1] if len(row) > 1 else "",
-        int(row[2]) if len(row) > 2 and row[2] is not None else 0,
+        int(row[2]) if len(row) > 2 and row[2] is not None else 0
     )
 
+    
+    print(f"DEBUG: Retrieved isadmin={isadmin} for username={username}")
+
+    # Validate the password
     if db_password != password:
         return jsonify({"error": "invalid_credentials"}), 401
 
@@ -415,6 +420,7 @@ def leadership_me():
 
     json_path = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
+        "..",
         "public",
         "Data",
         "employees.json"
@@ -470,6 +476,7 @@ def leadership_all():
 
     json_path = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
+        "..",
         "public",
         "Data",
         "employees.json"

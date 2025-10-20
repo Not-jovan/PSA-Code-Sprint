@@ -14,28 +14,24 @@ CREATE TABLE IF NOT EXISTS users (
 )
 """)
 
-# Insert test users
-cursor.execute("""
-INSERT OR IGNORE INTO users (username, password, name, isadmin)
-VALUES (?, ?, ?, ?)
-""", ("EMP-20001", "password", "Samantha Lee", 0))
+# Insert or update test users
+users = [
+    ("EMP-20001", "password", "Samantha Lee", 0),
+    ("EMP-20002", "password", "Nur Aisyah Binte Rahman", 0),
+    ("EMP-20003", "password", "Rohan Mehta", 0),
+    ("EMP-20004", "password", "Grace Lee", 1),  # Admin
+    ("EMP-20005", "password", "Felicia Goh", 0)
+]
 
-cursor.execute("""
-INSERT OR IGNORE INTO users (username, password, name, isadmin)
-VALUES (?, ?, ?, ?)
-""", ("EMP-20002", "password", "Nur Aisyah Binte Rahman", 0))
-cursor.execute("""
-INSERT OR IGNORE INTO users (username, password, name, isadmin)
-VALUES (?, ?, ?, ?)
-""", ("EMP-20003", "password", "Rohan Mehta", 0))
-cursor.execute("""
-INSERT OR IGNORE INTO users (username, password, name, isadmin)
-VALUES (?, ?, ?, ?)
-""", ("EMP-20004", "password", "Grace Lee", 1))
-cursor.execute("""
-INSERT OR IGNORE INTO users (username, password, name, isadmin)
-VALUES (?, ?, ?, ?)
-""", ("EMP-20005", "password", "Felicia Goh", 0))  # Admin
+for user in users:
+    cursor.execute("""
+    INSERT INTO users (username, password, name, isadmin)
+    VALUES (?, ?, ?, ?)
+    ON CONFLICT(username) DO UPDATE SET
+        password=excluded.password,
+        name=excluded.name,
+        isadmin=excluded.isadmin
+    """, user)
 
 conn.commit()
 conn.close()
