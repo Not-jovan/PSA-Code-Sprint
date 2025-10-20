@@ -23,10 +23,10 @@ Before you begin, ensure you have the following installed on your system:
 - **SQLite** (for the backend database)
 
 1. [NodeJS and npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
-1. Install [pnpm](https://pnpm.io/installation) (It's essentially `npm` but faster).
-1. Check if you have git installed, if not, install [git](https://git-scm.com/downloads) 
-1. Make sure to link your Github account to your local git installation. See (`https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent`)
-1. Clone this repository by running `git clone git@github.com:Not-jovan/PSA-Code-Sprint.git`.
+2. Install [pnpm](https://pnpm.io/installation) (It's essentially `npm` but faster).
+3. Check if you have git installed, if not, install [git](https://git-scm.com/downloads) 
+4. Make sure to link your Github account to your local git installation. See (`https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent`)
+5. Clone this repository by running `git clone git@github.com:Not-jovan/PSA-Code-Sprint.git`.
 
 ---
 
@@ -35,12 +35,9 @@ Before you begin, ensure you have the following installed on your system:
 ``` 
     git clone <gh repo clone Not-jovan/PSA-Code-Sprint>
     cd PSA-Code-Sprint
-    
 ```
-### 2. Install dependencies
 
-#### **Backend Dependencies**
-## Setup
+### **2. Install Dependencies**
 
 **NOTE:** File paths are relative to this `/PSA-Code-Sprint` folder.
 
@@ -48,7 +45,6 @@ Before you begin, ensure you have the following installed on your system:
 2. Run `pnpm i` to install the dependencies. Make sure you are in this working directory in your CLI.
 3. Run  `pip install -r requirements.txt` to install the python packages. 
 4. Setup `.env`.
-
 
 ---
 
@@ -72,8 +68,6 @@ Before you begin, ensure you have the following installed on your system:
     ```
 3. The frontend server should now be running at `http://localhost:3000`.
 
-```
-```
 ## **Database Initialization**
 1. Navigate to the `db` directory:
     ```
