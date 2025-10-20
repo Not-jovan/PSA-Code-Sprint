@@ -3,6 +3,10 @@
 This project is an employee career portal that includes a React-based frontend and a Flask-based backend. It provides features such as leadership potential scoring, chat functionality, and employee data management.
 
 ---
+# Authors:
+1. Jovan Ho
+2. Adrian
+3. Jia Hao
 
 ## **Table of Contents**
 1. [Prerequisites](#prerequisites)
@@ -142,6 +146,3 @@ employee-career-portal/
 ├── example.env          # example of .env file
 ```
 ---
-
-## **License**
-This project is licensed under the [MIT License](LICENSE).
