@@ -7,7 +7,7 @@ import ProfilesTab from "./components/ProfilesTab";
 import CareerDevTab from "./components/CareerDevTab";
 import ChatbotWidget from "./components/ChatbotWidget";
 import Feedback from "./components/Feedback";
-
+import LeadershipPotential from "./components/LeadershipPotential";
 import type { EmployeeProfile } from "./validation/schemas";
 
 const App = () => {
@@ -194,6 +194,10 @@ return (
       <Tab label="Feedback">
         <Feedback darkMode={darkMode}/>
       </Tab>
+      <Tab label="Leadership Potential">
+        <LeadershipPotential/>
+      </Tab>
+
     </NavTabs>
 
 

@@ -357,6 +357,55 @@ def create_vector_store():
     r.raise_for_status()
     return jsonify(r.json()), 201
 
+#----------------Leadership Potential----------------------
+
+from leadership import compute_weighted_LPI, summarize_leadership
+from flask_cors import cross_origin
+
+@app.route("/api/leadership/me", methods=["OPTIONS", "GET"])
+@cross_origin(origins=["http://localhost:3000"], allow_headers=["Content-Type"], supports_credentials=True)
+def leadership_me():
+    # Allow preflight OPTIONS requests for CORS
+    if request.method == "OPTIONS":
+        return ("", 204)
+
+    # Must be logged in
+    username = session.get("username")
+    if not username:
+        return jsonify({"error": "not_logged_in", "detail": "Please log in first."}), 401
+
+    # Load only this user's employee data
+    json_path = os.path.join(os.path.dirname(__file__), "../public/Data/employees.json")
+    try:
+        with open(json_path, "r", encoding="utf-8") as f:
+            employees = json.load(f)
+        current = next((e for e in employees if e.get("employee_id") == username), None)
+    except Exception as e:
+        return jsonify({"error": "data_load_failed", "detail": str(e)}), 500
+
+    if not current:
+        return jsonify({"error": "not_found", "detail": f"No employee profile for '{username}'"}), 404
+
+    # Compute leadership potential for the logged-in user only
+    try:
+        score, subscores = compute_weighted_LPI(current)
+        try:
+            summary = summarize_leadership(current, score, subscores)
+        except Exception as e:
+            summary = f"(AI summary unavailable: {e})"
+
+        return jsonify({
+            "employee_id": current.get("employee_id"),
+            "name": (current.get("personal_info") or {}).get("name"),
+            "leadership_score": score,
+            "dimension_scores": subscores,
+            "ai_summary": summary,
+        }), 200
+    except Exception as e:
+        print("leadership_me error:", e)
+        return jsonify({"error": "internal_error", "detail": str(e)}), 500
+
+
 # ---------------- WebSocket Routes ----------------
 @socketio.on("connect", namespace="/ws")
 def handle_connect():
@@ -371,6 +420,8 @@ def handle_message(data):
 @socketio.on("disconnect", namespace="/ws")
 def handle_disconnect():
     print("Client disconnected")
+
+
 
 # ---------------- JSON Error Handlers ----------------
 @app.errorhandler(400)
