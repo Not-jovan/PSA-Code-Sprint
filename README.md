@@ -33,7 +33,7 @@ Before you begin, ensure you have the following installed on your system:
 ## **Setup Instructions**
 
 ### **1. Clone the Repository**
-    ```
+    ```shell
     git clone <gh repo clone Not-jovan/PSA-Code-Sprint>
     cd PSA-Code-Sprint
     ```
@@ -54,8 +54,6 @@ Before you begin, ensure you have the following installed on your system:
 ---
 
 ## **Starting the Servers**
-
-```shell
 ### **1. Start the Backend Server**
 1. Ensure you are in the `server` directory.
 2. Run the Flask development server:
@@ -76,6 +74,7 @@ Before you begin, ensure you have the following installed on your system:
 3. The frontend server should now be running at `http://localhost:3000`.
 
 ```
+```
 ## **Database Initialization**
 1. Navigate to the `db` directory:
     ```
@@ -88,7 +87,6 @@ Before you begin, ensure you have the following installed on your system:
 3. This will create the SQLite database and populate it with the necessary tables.
 
 ---
-
 ## **Troubleshooting**
 
 ### **Common Issues**
@@ -96,7 +94,6 @@ Before you begin, ensure you have the following installed on your system:
     - Ensure you have copied `.env.example` to `.env` and filled in the required values.
 
 2. **Backend Server Fails to Start**:
-    - Check if the virtual environment is activated.
     - Ensure all Python dependencies are installed by typing:
     ```
     pip install -r requirements.txt
