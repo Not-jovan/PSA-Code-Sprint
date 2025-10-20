@@ -218,7 +218,7 @@ def login():
     try:
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
-        cursor.execute("SELECT password FROM users WHERE username=?", (username,))
+        cursor.execute("SELECT password, name FROM users WHERE username=?", (username,))
         row = cursor.fetchone()
         conn.close()
     except Exception as e:
@@ -232,7 +232,11 @@ def login():
     if "histories" not in session:
         session["histories"] = {}
 
-    return jsonify({"ok": True, "username": username})
+    return jsonify({
+        "ok": True,
+        "username": username,
+        "name": row[1]  # <— name fetched from DB
+    })
 
 @app.post("/api/chat")
 def chat():

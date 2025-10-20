@@ -31,8 +31,6 @@ const App = () => {
   const [dataLoading, setDataLoading] = useState<boolean>(true);
   const [dataError, setDataError] = useState<string | null>(null);
 
-  const sharedPassword = "password"; // Temporary shared password
-
   const handleLogin = useCallback(async (username: string, password: string): Promise<boolean> => {
    try {
      const res = await fetch("/api/login", {
