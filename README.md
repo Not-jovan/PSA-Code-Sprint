@@ -28,15 +28,15 @@ Before you begin, ensure you have the following installed on your system:
 1. [NodeJS and npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
 1. Install [pnpm](https://pnpm.io/installation) (It's essentially `npm` but faster).
 1. Check if you have git installed, if not, install [git](https://git-scm.com/downloads) 
-1. Make sure to link your Github account to your local git installation. See [here](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
-1. Clone this repository by running 'git clone git@github.com:Not-jovan/PSA-Code-Sprint.git'/
+1. Make sure to link your Github account to your local git installation. See (`https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent`)
+1. Clone this repository by running `git clone git@github.com:Not-jovan/PSA-Code-Sprint.git`.
 
 ---
 
 ## **Setup Instructions**
 
 ### **1. Clone the Repository**
-    ```bash
+    ```
     git clone <gh repo clone Not-jovan/PSA-Code-Sprint>
     cd PSA-Code-Sprint
     ```
@@ -45,6 +45,7 @@ Before you begin, ensure you have the following installed on your system:
 
 #### **Backend Dependencies**
 ## Setup
+
 **NOTE:** File paths are relative to this `/PSA-Code-Sprint` folder.
 
 1. Copy `./.example.env` and paste it in a new file `./.env`.
@@ -57,21 +58,22 @@ Before you begin, ensure you have the following installed on your system:
 
 ## **Starting the Servers**
 
+```shell
 ### **1. Start the Backend Server**
 1. Ensure you are in the `server` directory.
 2. Run the Flask development server:
-    ```bash
+    ```
     python3 app.py
     ```
 3. The backend server should now be running at `http://localhost:8080`.
 
 ### **2. Start the Frontend Server**
 1. Navigate to the `root` directory:
-    ```bash
-    cd ..
     ```
+    cd ..
+    
 2. Start the React development server:
-    ```bash
+    ```
     pnpm start
     ```
 3. The frontend server should now be running at `http://localhost:3000`.
@@ -80,11 +82,11 @@ Before you begin, ensure you have the following installed on your system:
 
 ## **Database Initialization**
 1. Navigate to the `db` directory:
-    ```bash
+    ```
     cd db
     ```
 2. Run the database initialization script:
-    ```bash
+    ```
     python3 init.py
     ```
 3. This will create the SQLite database and populate it with the necessary tables.
@@ -100,7 +102,7 @@ Before you begin, ensure you have the following installed on your system:
 2. **Backend Server Fails to Start**:
     - Check if the virtual environment is activated.
     - Ensure all Python dependencies are installed by typing:
-        ```bash
+    ```
     pip install -r requirements.txt
     ```
 
@@ -108,7 +110,7 @@ Before you begin, ensure you have the following installed on your system:
 3. **Frontend Server Fails to Start**:
     - Verify that `pnpm` is installed and dependencies are correctly installed.
     - install `pnpm` globally by typing:
-      ```bash
+    ```
     npm install -g pnpm
     ```
 
@@ -116,9 +118,9 @@ Before you begin, ensure you have the following installed on your system:
     - Ensure the `init.py` script has been run successfully.
 
 ---
-
-## **Project Structure**
 ```
+**Project Structure**
+
 employee-career-portal/
 ├── db/
 │   ├── init.py         # Database initialization script
@@ -154,6 +156,6 @@ employee-career-portal/
 ├── example.env          # example of .env file
 
 ---
-
+```shell
 ## **License**
 This project is licensed under the [MIT License](LICENSE).
