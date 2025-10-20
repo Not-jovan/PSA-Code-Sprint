@@ -40,7 +40,7 @@ const App = () => {
      });   
      if (!res.ok) {
       const errorData = await res.json().catch(() => ({ error: 'Unknown server error' }));
-       console.error(`Login failed for ${username}: ${errorData.error || 'Server error'}. Try EMP-20001 / password123.`);
+       console.error(`Login failed for ${username}: ${errorData.error || 'Server error'}.`);
        return false;
      }
 
